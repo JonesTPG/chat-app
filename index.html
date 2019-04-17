@@ -1,0 +1,96 @@
+<!--
+    REFERENCE: https://socket.io/get-started/chat 
+-->
+
+<!doctype html>
+<html>
+  <head>
+    <title>Chat application</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+  </head>
+
+  <body>
+
+    <h2>Chat messages:</h2>
+
+    <ul id="messages"></ul>
+
+    <br><br>
+
+    <h2>Connected users:</h2>
+
+    <ul id="users"></ul>
+
+    <form id="chat-form" action="">
+      <input id="m" autocomplete="off" /><button>Send</button>
+    </form>
+
+    <div id="myModal" class="pop-up">
+        <div class="pop-up-content">
+        <h2>Welcome to the chat room.</h2>
+        <form id ="start-form">
+            <label>
+                Nickname:<br></br> 
+                <input id="username" class="text-input" type="text"/>
+            </label>
+            <br></br>
+            <button onClick="newPlayer()" class="blue darken-3">Start chatting!</Button>
+        </form>
+        <p>Please set your nickname.</p>
+        </div>
+    </div>
+
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script>
+    var socket = io();
+
+    $(function () {
+        
+        
+        $('#chat-form').submit(function(e){
+            e.preventDefault(); // prevents page reloading
+            socket.emit('chat message', $('#m').val());
+            $('#m').val('');
+            return false;
+        });
+
+        socket.on('chat message', function(msg){
+            $('#messages').append($('<li>').text(msg));
+        });
+
+
+        socket.on('playerUpdate', function(data) {
+
+          $("#users").empty();
+
+          $.each(data, function(key, val) {
+            $("#users").append("<li>"+data[key].username+"</li>");
+            });
+        });
+
+        $('#start-form').submit(function(e){
+        e.preventDefault(); // prevents page reloading
+        var modal = document.getElementById('myModal');
+        modal.style.display = "none";
+        return false;
+        });
+
+        
+        
+
+    });
+
+    function newPlayer() {
+       
+        var username = document.getElementById("username").value;
+        socket.emit('new player', username);
+    }
+
+    </script>
+   
+
+  </body>
+
+</html>
